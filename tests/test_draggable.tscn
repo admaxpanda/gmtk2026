@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://btestdrag0001"]
+
+[ext_resource type="Script" path="res://tests/test_draggable.gd" id="1_td"]
+
+[node name="TestDraggable" type="Node2D"]
+script = ExtResource("1_td")

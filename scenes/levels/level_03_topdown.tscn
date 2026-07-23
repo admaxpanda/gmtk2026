@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://blevel03topd00"]
+
+[ext_resource type="Script" path="res://scenes/levels/level_03_topdown.gd" id="1_l3"]
+
+[node name="Level03TopDown" type="Node2D"]
+script = ExtResource("1_l3")

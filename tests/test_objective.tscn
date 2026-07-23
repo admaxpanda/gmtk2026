@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://btestobj00006"]
+
+[ext_resource type="Script" path="res://tests/test_objective.gd" id="1_to"]
+
+[node name="TestObjective" type="Node2D"]
+script = ExtResource("1_to")

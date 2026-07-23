@@ -1,0 +1,22 @@
+# Godot 4+ specific ignores
+.godot/
+
+# Imported translations (auto-generated)
+*.translation
+
+# Mono / C# (in case of future C# adoption)
+.mono/
+data_*/
+mono_crash.*.json
+
+# Build / export output
+/builds/
+/export/
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
