@@ -9,6 +9,7 @@ const TESTS: Array = [
 	{"name": "Timer (Count Up/Down)", "desc": "LevelTimer dual-mode + timed_out", "path": "res://tests/test_timer.tscn"},
 	{"name": "Save Manager", "desc": "SaveManager direction-aware best times", "path": "res://tests/test_save.tscn"},
 	{"name": "Objective System", "desc": "ReachGoal + DragAllToZone objectives", "path": "res://tests/test_objective.tscn"},
+	{"name": "NinePatchRect 9-Slice", "desc": "Live 9-slice UI image stretching demo", "path": "res://tests/test_ninepatch.tscn"},
 ]
 
 
