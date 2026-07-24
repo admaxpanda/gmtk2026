@@ -1,0 +1,6 @@
+[gd_scene load_steps=2 format=3 uid="uid://blevel07stopclk"]
+
+[ext_resource type="Script" path="res://scenes/levels/level_07_stop_the_clock.gd" id="1_l7"]
+
+[node name="Level07StopTheClock" type="Node2D"]
+script = ExtResource("1_l7")

@@ -287,6 +287,8 @@ func _hint_for(level_id: String) -> String:
 			return "Platformer: A/D or Arrows to move, Space to jump.   |   Esc: Pause   R: Reset"
 		"level_03_topdown":
 			return "Top-Down: WASD or Arrows to move.   |   Esc: Pause   R: Reset"
+		"level_07_stop_the_clock":
+			return "Stop the Clock: Click the red button when the countdown hits 0.00 (within 0.25s).   |   Esc: Pause   R: Reset"
 		_:
 			return "Esc: Pause   R: Reset"
 

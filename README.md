@@ -20,6 +20,16 @@
   - `LevelObjective` 抽象基类（completed/failed/progress 信号，幂等触发）
   - `ReachGoalObjective` — 玩家进入目标区域即通关
   - `DragAllToZoneObjective` — N 个拖拽物全部放入 DropZone 即通关
+  - `StopClockObjective` — 倒计时归零瞬间点击红色按钮（容差 ±0.25s）即通关，按钮上实时显示 2 位小数倒计时
+
+关卡元数据集中定义在 [scenes/levels/levels.json](scenes/levels/levels.json)（id / title / subtitle / timer_mode / time_limit / order），新增关卡只需追加一条记录：
+
+| 关卡 | 玩法 | 计时模式 |
+|------|------|---------|
+| level_01_drag | 拖拽 N 个方块进 DropZone | 正计时 |
+| level_02_platform | 平台跳跃到达终点 | 60s 倒计时 |
+| level_03_topdown | 俯视角逃离迷宫 | 45s 倒计时 |
+| level_07_stop_the_clock | 倒计时归零瞬间点击红色按钮（±0.25s 容差） | 10s 倒计时 |
 
 ### 双模式计时器
 
@@ -92,9 +102,11 @@ GMTK_COUNTDOWN/
 ├── scenes/
 │   ├── main_menu.gd/.tscn     # 关卡选择菜单（锁定/解锁、进度统计）
 │   └── levels/
-│       ├── level_01_drag.gd    # DragAllToZone + 正计时
-│       ├── level_02_platform.gd # ReachGoal + 60s 倒计时
-│       └── level_03_topdown.gd # ReachGoal + 45s 倒计时
+│       ├── levels.json                # 关卡元数据（id/title/timer_mode/time_limit/order）
+│       ├── level_01_drag.gd           # DragAllToZone + 正计时
+│       ├── level_02_platform.gd       # ReachGoal + 60s 倒计时
+│       ├── level_03_topdown.gd        # ReachGoal + 45s 倒计时
+│       └── level_07_stop_the_clock.gd # StopClock + 10s 倒计时（点击精度挑战）
 ├── tests/                     # 7 个独立测试场景 + 测试菜单
 └── ui/hud.gd/.tscn            # 持久化 HUD + 暂停/完成面板
 ```
@@ -141,6 +153,7 @@ GMTK_COUNTDOWN/
 - **HUD PROCESS_MODE_ALWAYS** — 暂停时菜单仍可交互
 - **背景 Control `mouse_filter = IGNORE`** — 防止全屏 ColorRect/CenterContainer 拦截 Area2D 的 `input_event`
 - **`_visual.scale` 而非 `scale`** — 拖拽视觉反馈只缩放 Polygon2D，不影响 CollisionShape2D，避免 DropZone 计数抖动
+- **倒计时归零点击（Stop the Clock）** — `Area2D.input_event` 在 `LevelTimer._process` 之前处理，同帧点击归零先 `_complete()`，`timed_out` 因 `is_completed()` 为真而空转，零额外竞态处理
 
 ## 许可证
 
