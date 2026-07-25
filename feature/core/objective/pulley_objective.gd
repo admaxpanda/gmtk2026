@@ -11,6 +11,7 @@ extends LevelObjective
 @export var platform_position: Vector2 = Vector2(600, 880)
 @export var platform_sink_depth: float = 200.0
 @export var panel_position: Vector2 = Vector2(950, 760)
+@export var panel_size: Vector2 = Vector2(140, 280)  # SlidingPanel visual size
 @export var panel_max_rise: float = 200.0
 @export var button_position: Vector2 = Vector2(950, 880)
 @export var button_radius: float = 50.0
