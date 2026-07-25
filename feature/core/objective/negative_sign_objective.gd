@@ -9,7 +9,7 @@ extends LevelObjective
 @export var button_position: Vector2 = Vector2(960, 540)
 @export var button_radius: float = 110.0
 @export var button_color: Color = Color(0.80, 0.18, 0.18)
-@export var sign_position: Vector2 = Vector2(720, 50)  # Left of timer
+@export var timer_display_position: Vector2 = Vector2(960, 200)  # Center-top for timer display
 @export var trash_bin_position: Vector2 = Vector2(1720, 930)
 @export var time_limit: float = 10.0
 
@@ -51,18 +51,6 @@ func _build_button() -> void:
 	circle.color = button_color
 	_button.add_child(circle)
 
-	# Time label above button
-	_time_label = Label.new()
-	_time_label.text = "0.00"
-	_time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_time_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_time_label.add_theme_font_size_override("font_size", 48)
-	_time_label.add_theme_color_override("font_color", Color.WHITE)
-	_time_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_time_label.size = Vector2(200, 60)
-	_time_label.position = Vector2(-100, -button_radius - 80)
-	_button.add_child(_time_label)
-
 	# Collision
 	var col := CollisionShape2D.new()
 	var shape := CircleShape2D.new()
@@ -75,10 +63,22 @@ func _build_button() -> void:
 
 
 func _build_negative_sign() -> void:
+	# Negative sign on the left side of timer display
 	_negative_sign = NegativeSign.new()
-	_negative_sign.position = sign_position
+	_negative_sign.position = timer_display_position - Vector2(120, 0)  # Left side
 	_negative_sign.sign_removed.connect(_on_sign_removed)
 	add_child(_negative_sign)
+
+	# Time label on the right side of timer display
+	_time_label = Label.new()
+	_time_label.text = "0.00"
+	_time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_time_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_time_label.add_theme_font_size_override("font_size", 48)
+	_time_label.add_theme_color_override("font_color", Color.WHITE)
+	_time_label.position = timer_display_position + Vector2(60, 0) - Vector2(50, 24)  # Right side
+	_time_label.custom_minimum_size = Vector2(100, 48)
+	add_child(_time_label)
 
 
 func _build_trash_bin() -> void:

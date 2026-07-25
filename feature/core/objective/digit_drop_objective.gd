@@ -9,7 +9,7 @@ extends LevelObjective
 @export var button_position: Vector2 = Vector2(960, 540)
 @export var button_radius: float = 110.0
 @export var button_color: Color = Color(0.80, 0.18, 0.18)
-@export var virtual_timer_offset: Vector2 = Vector2(-200, 0)  # Left of main timer (HUD position)
+@export var timer_display_position: Vector2 = Vector2(960, 200)  # Center-top for timer display
 @export var trash_bin_position: Vector2 = Vector2(1720, 930)  # Bottom-right corner
 
 var _button: Area2D
@@ -34,11 +34,22 @@ func _ready() -> void:
 
 
 func _build_virtual_timer() -> void:
+	# Virtual timer (high digits) on the left side of the display
 	_virtual_timer = VirtualTimer.new()
-	# Position to the left of the HUD timer (which is at ~Vector2(20, 20))
-	_virtual_timer.position = Vector2(200, 50)  # Left side of screen, visible and draggable
+	_virtual_timer.position = timer_display_position - Vector2(100, 0)  # Left side
 	_virtual_timer.dropped_in_trash.connect(_on_virtual_timer_trashed)
 	add_child(_virtual_timer)
+
+	# Units digit label on the right side of the display
+	_units_label = Label.new()
+	_units_label.text = "0"
+	_units_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_units_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_units_label.add_theme_font_size_override("font_size", 64)
+	_units_label.add_theme_color_override("font_color", Color.WHITE)
+	_units_label.position = timer_display_position + Vector2(100, 0) - Vector2(40, 30)  # Right side
+	_units_label.custom_minimum_size = Vector2(80, 60)
+	add_child(_units_label)
 
 
 func _build_trash_bin() -> void:
@@ -63,18 +74,6 @@ func _build_button() -> void:
 	circle.polygon = _make_circle(button_radius, 48)
 	circle.color = button_color
 	_button.add_child(circle)
-
-	# Units digit label (on the button)
-	_units_label = Label.new()
-	_units_label.text = "0"
-	_units_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_units_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_units_label.add_theme_font_size_override("font_size", 64)
-	_units_label.add_theme_color_override("font_color", Color.WHITE)
-	_units_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_units_label.size = Vector2(button_radius * 2.0, 80.0)
-	_units_label.position = Vector2(-button_radius, -button_radius - 90.0)
-	_button.add_child(_units_label)
 
 	# Collision
 	var col := CollisionShape2D.new()
