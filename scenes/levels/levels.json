@@ -17,6 +17,14 @@
 			"time_limit": 11110.0,
 			"order": 20,
 			"record_time": false
+		},
+		{
+			"id": "level_03_clear_path",
+			"title": "Level 3 — Clear Path",
+			"subtitle": "Drag the blue block to the trash, then click the button.",
+			"timer_mode": "count_up",
+			"order": 30,
+			"record_time": false
 		}
 	]
 }
