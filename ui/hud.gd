@@ -57,12 +57,14 @@ func _build_ui() -> void:
 	_best_label.add_theme_font_size_override("font_size", 14)
 	root_vb.add_child(_best_label)
 
+	# Remove mode and progress labels - keep UI minimal
 	_mode_label = Label.new()
 	_mode_label.name = "Mode"
 	_mode_label.text = ""
 	_mode_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_mode_label.add_theme_font_size_override("font_size", 12)
 	_mode_label.add_theme_color_override("font_color", Color(0.6, 0.7, 0.85))
+	_mode_label.visible = false  # Hide mode label
 	root_vb.add_child(_mode_label)
 
 	_progress_label = Label.new()
@@ -71,17 +73,19 @@ func _build_ui() -> void:
 	_progress_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_progress_label.add_theme_font_size_override("font_size", 16)
 	_progress_label.add_theme_color_override("font_color", Color(0.9, 0.85, 0.5))
+	_progress_label.visible = false  # Hide progress label
 	root_vb.add_child(_progress_label)
 
 	add_child(_root_panel)
 
-	# Bottom controls hint
+	# Bottom controls hint (hidden)
 	_hint_label = Label.new()
 	_hint_label.name = "Hint"
 	_hint_label.text = ""
 	_hint_label.position = Vector2(20, 660)
 	_hint_label.add_theme_font_size_override("font_size", 14)
 	_hint_label.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
+	_hint_label.visible = false  # Hide hint label
 	add_child(_hint_label)
 
 	# Full-screen fail overlay (shown briefly on level_failed before auto-reload).
