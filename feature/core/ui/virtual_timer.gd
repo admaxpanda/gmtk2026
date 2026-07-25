@@ -34,6 +34,7 @@ func _ready() -> void:
 
 	_build_ui()
 	_connect_timer()
+	input_event.connect(_on_input_event)
 	_original_position = position
 
 
