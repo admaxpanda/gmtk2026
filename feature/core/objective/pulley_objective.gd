@@ -24,7 +24,9 @@ var _panel: SlidingPanel
 var _button: Area2D
 var _ground: StaticBody2D
 var _walls: StaticBody2D
-var _pulley_visual: Line2D
+var _platform_rope: Line2D  # Dynamic rope from pulley to platform
+var _panel_rope: Line2D    # Dynamic rope from pulley to panel
+var _pulley_top_y: float = 200.0  # Y position of pulley wheel
 
 
 func _ready() -> void:
@@ -103,6 +105,7 @@ func _build_walls() -> void:
 func _build_pulley_visual() -> void:
 	# Decorative pulley: a circle at top with two lines down to platform and panel
 	var pulley_pos := Vector2((platform_position.x + panel_position.x) * 0.5, pulley_top_y)
+	_pulley_top_y = pulley_pos.y
 
 	# Pulley wheel
 	var wheel := Polygon2D.new()
@@ -111,24 +114,21 @@ func _build_pulley_visual() -> void:
 	wheel.position = pulley_pos
 	add_child(wheel)
 
-	# Rope from pulley to platform
-	var platform_rope := Line2D.new()
-	platform_rope.width = 3
-	platform_rope.default_color = Color(0.65, 0.55, 0.40)
-	platform_rope.add_point(Vector2(platform_position.x, pulley_pos.y))
-	platform_rope.add_point(Vector2(platform_position.x, platform_position.y))
-	add_child(platform_rope)
+	# Rope from pulley to platform (dynamic)
+	_platform_rope = Line2D.new()
+	_platform_rope.width = 3
+	_platform_rope.default_color = Color(0.65, 0.55, 0.40)
+	_platform_rope.add_point(Vector2(platform_position.x, pulley_pos.y))
+	_platform_rope.add_point(Vector2(platform_position.x, platform_position.y))
+	add_child(_platform_rope)
 
-	# Rope from pulley to panel
-	var panel_rope := Line2D.new()
-	panel_rope.width = 3
-	panel_rope.default_color = Color(0.65, 0.55, 0.40)
-	panel_rope.add_point(Vector2(panel_position.x, pulley_pos.y))
-	panel_rope.add_point(Vector2(panel_position.x, panel_position.y - 140))
-	add_child(panel_rope)
-
-	# Store reference for dynamic updates (optional - can be enhanced)
-	_pulley_visual = platform_rope
+	# Rope from pulley to panel (dynamic)
+	_panel_rope = Line2D.new()
+	_panel_rope.width = 3
+	_panel_rope.default_color = Color(0.65, 0.55, 0.40)
+	_panel_rope.add_point(Vector2(panel_position.x, pulley_pos.y))
+	_panel_rope.add_point(Vector2(panel_position.x, panel_position.y - panel_size.y * 0.5))
+	add_child(_panel_rope)
 
 
 func _build_panel() -> void:
@@ -182,6 +182,9 @@ func _build_player() -> void:
 func _on_platform_moved(delta_y: float) -> void:
 	# Panel moves opposite to platform
 	_panel.on_platform_moved(delta_y)
+	# Update rope visuals to follow platform and panel positions
+	_platform_rope.set_point_position(1, Vector2(platform_position.x, _platform.position.y))
+	_panel_rope.set_point_position(1, Vector2(panel_position.x, _panel.position.y - _panel.panel_size.y * 0.5))
 
 
 func _on_button_body_entered(body: Node) -> void:

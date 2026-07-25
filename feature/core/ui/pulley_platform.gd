@@ -80,6 +80,10 @@ func _on_body_exited(body: Node) -> void:
 
 
 func _physics_process(delta: float) -> void:
+	# Safety: reset occupied state if player died or level changed
+	if _is_occupied and not _is_valid_player_present():
+		_is_occupied = false
+
 	var target: float = sink_depth if _is_occupied else 0.0
 	var prev_offset: float = _current_offset
 	_current_offset = move_toward(_current_offset, target, move_speed * delta)
@@ -87,6 +91,16 @@ func _physics_process(delta: float) -> void:
 	if delta_y != 0.0:
 		position.y = _original_position.y + _current_offset
 		moved.emit(delta_y)
+
+
+func _is_valid_player_present() -> bool:
+	# Check if player is still in the sensor area
+	var bodies: Array[Node2D] = _sensor.get_overlapping_bodies()
+	for body in bodies:
+		if body is CharacterBody2D and (body.collision_layer & (1 << 0)):
+			if is_instance_valid(body):
+				return true
+	return false
 
 
 func is_occupied() -> bool:

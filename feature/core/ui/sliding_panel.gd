@@ -46,9 +46,7 @@ func _build_visual() -> void:
 ## so panel rises (moves up = negative y).
 func on_platform_moved(delta_y: float) -> void:
 	# Platform moves down by delta_y, panel moves up by delta_y
-	var new_rise: float = _current_rise + delta_y
-	new_rise = clamp(new_rise, 0.0, max_rise)
-	var actual_delta: float = new_rise - _current_rise
+	var new_rise: float = clamp(_current_rise + delta_y, 0.0, max_rise)
 	_current_rise = new_rise
 	position.y = _original_position.y - _current_rise
 
