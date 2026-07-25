@@ -24,9 +24,146 @@
 
 关卡元数据集中定义在 [scenes/levels/levels.json](scenes/levels/levels.json)（id / title / subtitle / timer_mode / time_limit / order / record_time），新增关卡只需追加一条记录：
 
-| 关卡 | 玩法 | 计时模式 |
-|------|------|---------|
-| level_07_stop_the_clock | 倒计时归零瞬间点击红色按钮 | 10s 倒计时（不记录通关时间） |
+## 关卡设计
+
+### Level 1 — Stop the Clock（停表）
+
+| 属性 | 值 |
+|------|-----|
+| **机制** | 倒计时归零瞬间点击按钮 |
+| **计时模式** | 10 秒倒计时 |
+| **记录时间** | 否 |
+
+**玩法描述**：
+- 屏幕中央有一个红色圆形按钮，上方显示 2 位小数倒计时
+- 玩家需在倒计时归零（0.00）时点击按钮通关
+- 点击过早或超时未点击则失败
+- 右下角有装饰性回收站（非功能性）
+
+**技术要点**：
+- 按钮使用 `Area2D.input_event` 处理点击
+- 倒计时标签实时监听 `LevelTimer.tick` 信号
+- F6 单独运行支持（`LevelManager.begin_dev_test`）
+
+---
+
+### Level 2 — Digit Drop（数字丢弃）
+
+| 属性 | 值 |
+|------|-----|
+| **机制** | 拖动虚计时器截断时间 |
+| **计时模式** | 11110 秒倒计时 |
+| **记录时间** | 否 |
+
+**玩法描述**：
+- 左上角显示两个计时器：
+  - **虚计时器**：显示高位数字（如 `1111`）
+  - **主计时器**：显示个位数（如 `0`）
+- 实际时间 = 虚计时器值 × 10 + 主计时器值
+- 玩家可拖动虚计时器到右下角回收站
+- 丢弃后，时间截断为个位数继续倒数
+- 在显示 `0.00` 时点击按钮通关
+
+**技术要点**：
+- `VirtualTimer` 类继承 `Area2D`，可拖动
+- `LevelTimer.get_high_digits()` / `get_units_digit()` 分离数字
+- `LevelTimer.truncate_to_units()` 截断时间
+- 拖动到非回收站位置会弹回原位
+
+---
+
+### Level 3 — Clear Path（清路）
+
+| 属性 | 值 |
+|------|-----|
+| **机制** | 拖动方块移除遮挡 |
+| **计时模式** | 正计时 |
+| **记录时间** | 否 |
+
+**玩法描述**：
+- 屏幕中央有一个蓝色纸质方块，完全遮挡红色按钮
+- 玩家需将方块拖入右下角回收站
+- 方块消失后，按钮露出
+- 点击按钮即可通关（无时间限制）
+
+**技术要点**：
+- `PaperBlock` 类继承 `Area2D`，可拖动
+- `TrashBin` 类继承 `Area2D`，作为 DropZone
+- 检测 `get_overlapping_areas()` 判断是否拖入回收站
+
+---
+
+### Level 4 — Negative Sign（负号）
+
+| 属性 | 值 |
+|------|-----|
+| **机制** | 拖动负号切换显示模式 |
+| **计时模式** | 10 秒倒计时 |
+| **记录时间** | 否 |
+
+**玩法描述**：
+- 按钮上方显示倒计时，但前面有一个蓝色负号
+- **有负号时**：计时器显示负数增加（`0 → -1 → -2...`）
+- **无负号时**：计时器显示正常倒数（`10 → 9 → 8...`）
+- 玩家可拖动负号到回收站，移除后显示真实时间
+- 在显示 `0.00` 时点击按钮通关
+
+**技术要点**：
+- `NegativeSign` 类继承 `Area2D`，可拖动
+- 通过 `_elapsed_time` 计算实际经过时间
+- `_is_negative_mode` 控制显示模式
+- 移除负号后立即切换显示逻辑
+
+---
+
+### Level 5 — Pulley（滑轮）
+
+| 属性 | 值 |
+|------|-----|
+| **机制** | 平台跳跃 + 滑轮物理 |
+| **计时模式** | 30 秒倒计时 |
+| **记录时间** | 否 |
+
+**玩法描述**：
+- 玩家控制一个平台跳跃角色（青色方块）
+- 屏幕右侧有一个滑动面板，遮挡住红色按钮
+- 滑轮系统连接平台和面板：
+  - 玩家跳上平台 → 平台下沉
+  - 平台下沉 → 面板上升（滑轮原理）
+- 当面板完全上升后，按钮露出
+- 玩家从平台跳到按钮上触发通关
+
+**技术要点**：
+- `PulleyPlatform` 继承 `AnimatableBody2D`，检测玩家站立后下沉
+- `SlidingPanel` 继承 `AnimatableBody2D`，监听平台移动信号反向上升
+- 绳索视觉动态更新（`Line2D.set_point_position`）
+- 平台传感器安全检查（防止玩家死亡后状态不同步）
+- 使用 `PlayerPlatformer` 类实现专业手感（Coyote Time + Jump Buffering）
+
+---
+
+### 关卡机制总结
+
+| 关卡 | 核心交互 | UI 元素 | 物理系统 |
+|------|---------|---------|---------|
+| Level 1 | 点击 | 按钮、倒计时标签 | 无 |
+| Level 2 | 拖拽 | 虚计时器、回收站 | 无 |
+| Level 3 | 拖拽 | 纸质方块、回收站 | 无 |
+| Level 4 | 拖拽 | 负号、回收站 | 无 |
+| Level 5 | 平台跳跃 | 滑轮、绳索、面板 | CharacterBody2D + AnimatableBody2D |
+
+---
+
+### 可复用组件
+
+| 组件类 | 文件 | 用途 |
+|--------|------|------|
+| `VirtualTimer` | [feature/core/ui/virtual_timer.gd](feature/core/ui/virtual_timer.gd) | 可拖动的计时器显示 |
+| `TrashBin` | [feature/core/ui/trash_bin.gd](feature/core/ui/trash_bin.gd) | 回收站区域 |
+| `PaperBlock` | [feature/core/ui/paper_block.gd](feature/core/ui/paper_block.gd) | 可拖动的遮挡物 |
+| `NegativeSign` | [feature/core/ui/negative_sign.gd](feature/core/ui/negative_sign.gd) | 可拖动的负号 |
+| `PulleyPlatform` | [feature/core/ui/pulley_platform.gd](feature/core/ui/pulley_platform.gd) | 滑轮平台（下沉检测） |
+| `SlidingPanel` | [feature/core/ui/sliding_panel.gd](feature/core/ui/sliding_panel.gd) | 滑动面板（联动上升） |
 
 ### 双模式计时器
 
