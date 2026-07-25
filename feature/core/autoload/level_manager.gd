@@ -6,7 +6,7 @@ extends Node
 ## Level metadata is loaded from scenes/levels/levels.json at _ready().
 ## Edit that JSON file to add/reorder levels — no code changes needed.
 
-const MAIN_MENU: String = "res://scenes/level_select.tscn"  # Use level select with thumbnails
+const MAIN_MENU: String = "res://scenes/main_menu.tscn"
 const LEVELS_FILE: String = "res://scenes/levels/levels.json"
 
 var _levels: Array = []
@@ -63,13 +63,11 @@ func is_level_unlocked(level_id: String) -> bool:
 	var idx: int = get_level_index(level_id)
 	if idx < 0:
 		return false
-	# All levels unlocked for testing
-	return true
-	# Original cascade logic (disabled for testing):
-	# if idx == 0:
-	# 	return true
-	# var prev_id: String = _levels[idx - 1]["id"]
-	# return SaveManager.is_level_completed(prev_id)
+	if idx == 0:
+		return true
+	# Unlock cascade: previous level must be completed.
+	var prev_id: String = _levels[idx - 1]["id"]
+	return SaveManager.is_level_completed(prev_id)
 
 
 ## Returns { "completed": int, "total": int, "ratio": float }
