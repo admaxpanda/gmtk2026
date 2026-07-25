@@ -6,7 +6,7 @@ extends Node
 ## Level metadata is loaded from scenes/levels/levels.json at _ready().
 ## Edit that JSON file to add/reorder levels — no code changes needed.
 
-const MAIN_MENU: String = "res://scenes/main_menu.tscn"
+const MAIN_MENU: String = "res://scenes/level_select.tscn"  # Use level select with thumbnails
 const LEVELS_FILE: String = "res://scenes/levels/levels.json"
 
 var _levels: Array = []
