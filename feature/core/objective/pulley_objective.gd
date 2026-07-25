@@ -18,11 +18,13 @@ extends LevelObjective
 @export var button_color: Color = Color(0.80, 0.18, 0.18)
 @export var ground_y: float = 940.0
 @export var pulley_top_y: float = 200.0  # Decorative pulley position
+@export var timer_display_position: Vector2 = Vector2(960, 200)  # Center-top for timer display
 
 var _player: PlayerPlatformer
 var _platform: PulleyPlatform
 var _panel: SlidingPanel
 var _button: Area2D
+var _timer_label: Label
 var _ground: StaticBody2D
 var _walls: StaticBody2D
 var _platform_rope: Line2D  # Dynamic rope from pulley to platform
@@ -33,6 +35,7 @@ var _pulley_top_y: float = 200.0  # Y position of pulley wheel
 func _ready() -> void:
 	_build_ground()
 	_build_walls()
+	_build_timer_display()
 	_build_pulley_visual()
 	_build_panel()
 	_build_platform()
@@ -44,6 +47,27 @@ func _ready() -> void:
 		var level_id := get_tree().current_scene.scene_file_path.get_file().get_basename()
 		LevelManager.begin_dev_test(level_id)
 
+	_emit_progress()
+
+
+func _build_timer_display() -> void:
+	# Timer label at center-top
+	_timer_label = Label.new()
+	_timer_label.text = "30.00"
+	_timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_timer_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_timer_label.add_theme_font_size_override("font_size", 48)
+	_timer_label.add_theme_color_override("font_color", Color.WHITE)
+	_timer_label.position = timer_display_position - Vector2(50, 24)
+	_timer_label.custom_minimum_size = Vector2(100, 48)
+	add_child(_timer_label)
+
+	# Connect to timer updates
+	LevelTimer.tick.connect(_on_timer_tick)
+
+
+func _on_timer_tick(display_time: float) -> void:
+	_timer_label.text = "%.2f" % display_time
 	_emit_progress()
 
 

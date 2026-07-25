@@ -11,8 +11,10 @@ extends LevelObjective
 @export var block_size: Vector2 = Vector2(260, 260)
 @export var block_color: Color = Color(0.25, 0.45, 0.75)
 @export var trash_bin_position: Vector2 = Vector2(1720, 930)
+@export var timer_display_position: Vector2 = Vector2(960, 200)  # Center-top for timer display
 
 var _button: Area2D
+var _timer_label: Label
 var _paper_block: PaperBlock
 var _trash_bin: TrashBin
 var _is_block_removed: bool = false
@@ -20,6 +22,7 @@ var _is_block_removed: bool = false
 
 func _ready() -> void:
 	_build_trash_bin()
+	_build_timer_display()
 	_build_button()
 	_build_paper_block()
 
@@ -28,6 +31,27 @@ func _ready() -> void:
 		var level_id := get_tree().current_scene.scene_file_path.get_file().get_basename()
 		LevelManager.begin_dev_test(level_id)
 
+	_emit_progress()
+
+
+func _build_timer_display() -> void:
+	# Timer label at center-top
+	_timer_label = Label.new()
+	_timer_label.text = "0.00"
+	_timer_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_timer_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_timer_label.add_theme_font_size_override("font_size", 48)
+	_timer_label.add_theme_color_override("font_color", Color.WHITE)
+	_timer_label.position = timer_display_position - Vector2(50, 24)
+	_timer_label.custom_minimum_size = Vector2(100, 48)
+	add_child(_timer_label)
+
+	# Connect to timer updates
+	LevelTimer.tick.connect(_on_timer_tick)
+
+
+func _on_timer_tick(display_time: float) -> void:
+	_timer_label.text = "%.2f" % display_time
 	_emit_progress()
 
 
