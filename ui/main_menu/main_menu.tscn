@@ -1,0 +1,101 @@
+[gd_scene format=3 uid="uid://c0jlhcymjadgh"]
+
+[ext_resource type="Texture2D" uid="uid://tj4jbnxsiuk8" path="res://ui/main_menu/background.png" id="1_i5wg5"]
+[ext_resource type="FontFile" uid="uid://cda1rxsy8tumc" path="res://fonts/Kaph-Regular.ttf" id="1_mu8pm"]
+[ext_resource type="Theme" uid="uid://sjbabj8h1ors" path="res://ui/main_menu/mainUI.tres" id="1_omy8q"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_mu8pm"]
+content_margin_left = 20.0
+content_margin_top = 0.0
+content_margin_bottom = 0.0
+bg_color = Color(1, 1, 1, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_omy8q"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 20
+border_color = Color(0.57, 0.57, 0.57, 0.47058824)
+border_blend = true
+
+[sub_resource type="Animation" id="Animation_omy8q"]
+resource_name = "new_animation"
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_i5wg5"]
+_data = {
+&"new_animation": SubResource("Animation_omy8q")
+}
+
+[node name="MainMenu" type="Control" unique_id=1376165548]
+layout_mode = 3
+anchors_preset = 0
+offset_right = -0.00012207031
+offset_bottom = -0.00012207031
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TextureRect" type="TextureRect" parent="." unique_id=397385010]
+layout_mode = 0
+offset_left = 2.0
+offset_right = 1922.0
+offset_bottom = 1080.0
+texture = ExtResource("1_i5wg5")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=895721170]
+visible = false
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+
+[node name="BoxContainer2" type="BoxContainer" parent="." unique_id=441477313]
+layout_mode = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+theme = ExtResource("1_omy8q")
+theme_override_constants/separation = 0
+
+[node name="left_tab" type="PanelContainer" parent="BoxContainer2" unique_id=1520174043]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_mu8pm")
+
+[node name="BoxContainer" type="BoxContainer" parent="BoxContainer2/left_tab" unique_id=1682492014]
+clip_contents = true
+layout_mode = 2
+theme = ExtResource("1_omy8q")
+theme_override_constants/separation = 20
+alignment = 1
+vertical = true
+
+[node name="title" type="Label" parent="BoxContainer2/left_tab/BoxContainer" unique_id=512831413]
+layout_mode = 2
+theme_override_colors/font_color = Color(0, 0, 0, 1)
+theme_override_fonts/font = ExtResource("1_mu8pm")
+theme_override_font_sizes/font_size = 150
+text = "title"
+
+[node name="start" type="Button" parent="BoxContainer2/left_tab/BoxContainer" unique_id=1332063554]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_mu8pm")
+theme_override_font_sizes/font_size = 60
+text = "Start"
+language = "en"
+
+[node name="record" type="Button" parent="BoxContainer2/left_tab/BoxContainer" unique_id=699712553]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_mu8pm")
+theme_override_font_sizes/font_size = 60
+text = "Record"
+language = "en"
+
+[node name="quit" type="Button" parent="BoxContainer2/left_tab/BoxContainer" unique_id=1895532326]
+layout_mode = 2
+theme_override_fonts/font = ExtResource("1_mu8pm")
+theme_override_font_sizes/font_size = 60
+text = "Quit
+"
+language = "en"
+
+[node name="main_content" type="PanelContainer" parent="BoxContainer2" unique_id=252002909]
+layout_mode = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_omy8q")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="BoxContainer2/main_content" unique_id=495976011]
+libraries/ = SubResource("AnimationLibrary_i5wg5")

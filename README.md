@@ -157,19 +157,19 @@ GMTK_COUNTDOWN/
    extends BaseLevel
 
    func _build_level() -> void:
-       var objective := ClickButtonObjective.new()
-       add_child(objective)
+	   var objective := ClickButtonObjective.new()
+	   add_child(objective)
    ```
 
 3. **注册关卡元数据**（在 `scenes/levels/levels.json`）：
    ```json
    {
-       "id": "level_08_click_the_button",
-       "title": "Level 8 — Click the Button",
-       "subtitle": "Click the button to win.",
-       "timer_mode": "count_up",
-       "order": 80,
-       "record_time": true
+	   "id": "level_08_click_the_button",
+	   "title": "Level 8 — Click the Button",
+	   "subtitle": "Click the button to win.",
+	   "timer_mode": "count_up",
+	   "order": 80,
+	   "record_time": true
    }
    ```
 

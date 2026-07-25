@@ -1,0 +1,37 @@
+[gd_resource type="Theme" format=3 uid="uid://sjbabj8h1ors"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_ipbav"]
+bg_color = Color(0.95825905, 0.92376494, 0.9385629, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_emssj"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0, 0, 0, 1)
+border_blend = true
+corner_detail = 12
+shadow_color = Color(0, 0, 0, 0.3764706)
+shadow_size = 2
+shadow_offset = Vector2(-2, -2)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_qou3s"]
+bg_color = Color(1, 1, 1, 1)
+border_width_left = 20
+border_width_top = 20
+border_color = Color(0.11, 0.11, 0.11, 0.47843137)
+border_blend = true
+shadow_size = 2
+shadow_offset = Vector2(2, 2)
+
+[resource]
+Button/colors/font_color = Color(0, 0, 0, 1)
+Button/colors/font_hover_color = Color(0, 0, 0, 1)
+Button/colors/font_pressed_color = Color(0, 0, 0, 1)
+Button/styles/hover = SubResource("StyleBoxFlat_ipbav")
+Button/styles/normal = SubResource("StyleBoxFlat_emssj")
+Button/styles/pressed = SubResource("StyleBoxFlat_qou3s")
