@@ -25,6 +25,15 @@
 			"timer_mode": "count_up",
 			"order": 30,
 			"record_time": false
+		},
+		{
+			"id": "level_04_negative_sign",
+			"title": "Level 4 — Negative Sign",
+			"subtitle": "Remove the negative sign to see the true time, or wait.",
+			"timer_mode": "count_down",
+			"time_limit": 10.0,
+			"order": 40,
+			"record_time": false
 		}
 	]
 }
