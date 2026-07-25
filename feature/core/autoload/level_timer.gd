@@ -9,6 +9,7 @@ extends Node
 
 signal tick(display_time: float)
 signal timed_out
+signal truncated_to_units(units_digit: int)  # Emitted when time is truncated to units digit
 
 enum Mode { COUNT_UP, COUNT_DOWN }
 
@@ -120,3 +121,42 @@ func _process(_delta: float) -> void:
 			_timed_out_fired = true
 			tick.emit(0.0)
 			timed_out.emit()
+
+
+# ---------- Digit Manipulation (for Level 2: Digit Drop) ----------
+
+## Returns the high digits (tens, hundreds, thousands, etc.) of the display time.
+## Example: time=11110 → returns 1111
+## Only meaningful for countdown mode; returns 0 for count-up.
+func get_high_digits() -> int:
+	if _mode != Mode.COUNT_DOWN:
+		return 0
+	var remaining: float = get_remaining()
+	return int(remaining / 10.0)
+
+
+## Returns the units digit (0-9) of the display time.
+## Example: time=11110 → returns 0, time=11115 → returns 5
+func get_units_digit() -> int:
+	var time: float = get_display_time()
+	return int(time) % 10
+
+
+## Truncates the timer to only show units digit (0-9).
+## Example: time=11110 → becomes 0, time=11115 → becomes 5
+## Only works for countdown mode. Emits truncated_to_units signal.
+func truncate_to_units() -> void:
+	if _mode != Mode.COUNT_DOWN:
+		return
+	var units: int = get_units_digit()
+	# Set the time limit to just the units digit
+	_time_limit = float(units)
+	# Reset accumulated to match the new remaining time
+	_accumulated = 0.0
+	_start_msec = Time.get_ticks_msec()
+	_timed_out_fired = false
+	_running = true
+	# Emit signal so listeners (HUD, objectives) can update
+	truncated_to_units.emit(units)
+	# Emit tick to update display
+	tick.emit(float(units))

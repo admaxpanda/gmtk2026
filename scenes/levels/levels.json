@@ -8,6 +8,15 @@
 			"time_limit": 10.0,
 			"order": 10,
 			"record_time": false
+		},
+		{
+			"id": "level_02_digit_drop",
+			"title": "Level 2 — Digit Drop",
+			"subtitle": "Drop the virtual timer to truncate time, or wait. Click at 0!",
+			"timer_mode": "count_down",
+			"time_limit": 11110.0,
+			"order": 20,
+			"record_time": false
 		}
 	]
 }

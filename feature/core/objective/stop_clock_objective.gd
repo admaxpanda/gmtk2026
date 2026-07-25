@@ -15,6 +15,7 @@ extends LevelObjective
 @export var button_radius: float = 110.0
 @export var button_color: Color = Color(0.80, 0.18, 0.18)
 @export var label_text_color: Color = Color(1.0, 1.0, 1.0)
+@export var trash_bin_position: Vector2 = Vector2(1720, 930)  # Bottom-right corner
 
 var _button: Area2D
 var _time_label: Label
@@ -58,6 +59,12 @@ func _ready() -> void:
 	_button.input_event.connect(_on_input_event)
 	LevelTimer.tick.connect(_on_tick)
 	add_child(_button)
+
+	# Decorative trash bin (same as Level 2, but non-functional)
+	var trash_bin := TrashBin.new()
+	trash_bin.position = trash_bin_position
+	trash_bin.is_functional = false  # Decorative only
+	add_child(trash_bin)
 
 	# F6/dev support: if LevelManager hasn't adopted this scene (standalone
 	# run via F6), ask it to adopt us so complete/fail/timed_out work. In
