@@ -90,7 +90,7 @@ GMTK_COUNTDOWN/
 ├── feature/
 │   ├── core/
 │   │   ├── autoload/          # SignalBus, SaveManager, LevelTimer, LevelManager
-│   │   ├── objective/         # LevelObjective + ReachGoal + DragAllToZone
+│   │   ├── objective/         # LevelObjective + ReachGoal + DragAllToZone + TemplateObjective
 │   │   ├── base_level.gd      # 关卡基类
 │   │   └── scene_helpers.gd   # 测试场景共享工具
 │   ├── drag/draggable.gd
@@ -100,6 +100,7 @@ GMTK_COUNTDOWN/
 │   ├── main_menu.gd/.tscn     # 主菜单（入口，跳转到关卡选择）
 │   └── levels/
 │       ├── levels.json                # 关卡元数据（id/title/timer_mode/time_limit/order/record_time）
+│       ├── level_template.gd          # 关卡脚本模板（创建新关卡时复制）
 │       └── level_07_stop_the_clock.gd # StopClock + 10s 倒计时（点击精度挑战）
 ├── tests/                     # 7 个独立测试场景 + 测试菜单
 └── ui/hud.gd/.tscn            # 持久化 HUD + 暂停/完成面板
@@ -138,6 +139,74 @@ GMTK_COUNTDOWN/
 | [test_objective](tests/test_objective.tscn) | DragAllToZone + ReachGoal 双目标、幂等性 |
 | [test_ninepatch](tests/test_ninepatch.tscn) | NinePatchRect 9-slice 切分演示，实时调整 patch margin + 尺寸 + 拉伸模式 |
 | [test_menu](tests/test_menu.tscn) | 测试入口菜单，导航到上述 7 个场景 |
+
+## 创建新关卡
+
+项目提供了完整的关卡模板，可以快速创建新关卡。
+
+### 快速开始
+
+1. **复制关卡模板**：
+   - 复制 `scenes/levels/level_template.gd` 为 `level_XX_name.gd`
+   - 复制 `feature/core/objective/template_objective.gd` 为 `xx_objective.gd`
+
+2. **修改关卡脚本**：
+   ```gdscript
+   # level_08_click_the_button.gd
+   class_name Level08  # 改为你的关卡名
+   extends BaseLevel
+
+   func _build_level() -> void:
+       var objective := ClickButtonObjective.new()
+       add_child(objective)
+   ```
+
+3. **注册关卡元数据**（在 `scenes/levels/levels.json`）：
+   ```json
+   {
+       "id": "level_08_click_the_button",
+       "title": "Level 8 — Click the Button",
+       "subtitle": "Click the button to win.",
+       "timer_mode": "count_up",
+       "order": 80,
+       "record_time": true
+   }
+   ```
+
+### 关卡模板文件
+
+| 文件 | 用途 |
+|------|------|
+| [level_template.gd](scenes/levels/level_template.gd) | 关卡脚本模板，包含详细的创建步骤注释 |
+| [template_objective.gd](feature/core/objective/template_objective.gd) | 目标类模板，展示如何实现胜利/失败条件 |
+
+### 现有关卡目标类型
+
+| 目标类 | 触发条件 | 适用场景 |
+|--------|---------|---------|
+| `ReachGoalObjective` | 玩家进入目标区域 | 平台跳跃、俯视角关卡 |
+| `DragAllToZoneObjective` | N 个拖拽物全部放入 DropZone | 拖拽关卡 |
+| `StopClockObjective` | 倒计时归零瞬间点击按钮（±0.25s 容差） | 精度挑战关卡 |
+
+### 自定义目标类
+
+继承 `LevelObjective` 并实现：
+- `_ready()` — 初始化关卡元素（按钮、区域、物体等）
+- 胜利条件检测 — 调用 `_complete()`
+- 失败条件检测 — 调用 `_fail(reason)`
+- （可选）`get_progress_ratio()` / `get_progress_text()` — 进度显示
+
+### 关卡元数据字段
+
+| 字段 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| `id` | string | ✓ | 关卡唯一标识（对应脚本文件名） |
+| `title` | string | ✓ | 关卡标题（如 "Level 1 — Stop the Clock"） |
+| `subtitle` | string | | 关卡描述 |
+| `timer_mode` | string | | `"count_up"` 或 `"count_down"`，默认正计时 |
+| `time_limit` | float | | 倒计时限制（仅 `count_down` 有效） |
+| `order` | int | ✓ | 关卡顺序（10, 20, 30...） |
+| `record_time` | bool | | 是否记录通关时间，默认 `true` |
 
 ## 关键技术决策
 
