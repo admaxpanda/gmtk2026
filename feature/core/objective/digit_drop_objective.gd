@@ -35,7 +35,8 @@ func _ready() -> void:
 
 func _build_virtual_timer() -> void:
 	_virtual_timer = VirtualTimer.new()
-	_virtual_timer.position = Vector2(80, 50)  # Top-left area (HUD will handle main timer)
+	# Position to the left of the HUD timer (which is at ~Vector2(20, 20))
+	_virtual_timer.position = Vector2(200, 50)  # Left side of screen, visible and draggable
 	_virtual_timer.dropped_in_trash.connect(_on_virtual_timer_trashed)
 	add_child(_virtual_timer)
 

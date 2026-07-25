@@ -27,6 +27,7 @@ func _ready() -> void:
 	monitorable = true
 
 	_build_visual()
+	input_event.connect(_on_input_event)
 	_original_position = position
 
 
