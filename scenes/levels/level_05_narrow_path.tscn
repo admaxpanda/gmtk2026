@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://blevel05narow00"]
+[gd_scene format=3 uid="uid://if3tqqakfg6f"]
 
 [ext_resource type="Script" path="res://scenes/levels/level_05_narrow_path.gd" id="1_l5"]
 

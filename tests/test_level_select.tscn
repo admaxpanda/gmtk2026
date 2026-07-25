@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://btestlvlselect"]
+[gd_scene format=3 uid="uid://c5iiw5ni1x0hv"]
 
 [ext_resource type="Script" path="res://tests/test_level_select.gd" id="1_tls"]
 

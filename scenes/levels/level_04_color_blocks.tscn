@@ -1,4 +1,4 @@
-[gd_scene load_steps=2 format=3 uid="uid://blevel04color00"]
+[gd_scene format=3 uid="uid://if3tpfoefb6f"]
 
 [ext_resource type="Script" path="res://scenes/levels/level_04_color_blocks.gd" id="1_l4"]
 
