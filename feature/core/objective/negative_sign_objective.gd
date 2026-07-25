@@ -2,9 +2,9 @@ class_name NegativeSignObjective
 extends LevelObjective
 ## Level 4 objective: Negative Sign.
 ## - A blue negative sign appears before the timer
-## - When sign present: timer shows negative values (e.g., -10, -9, -8...)
-## - When sign removed: timer shows positive values (e.g., 10, 9, 8...)
-## - Win condition: click the button when timer shows 0
+## - When sign present: timer shows negative values increasing in magnitude (0 → -1 → -2...)
+## - When sign removed: timer shows positive countdown (10 → 9 → 8... → 0)
+## - Win condition: click the button when actual time reaches 0
 
 @export var button_position: Vector2 = Vector2(960, 540)
 @export var button_radius: float = 110.0
@@ -18,7 +18,7 @@ var _time_label: Label
 var _negative_sign: NegativeSign
 var _trash_bin: TrashBin
 var _is_negative_mode: bool = true
-var _time_display: float = 0.0
+var _elapsed_time: float = 0.0
 
 
 func _ready() -> void:
@@ -53,7 +53,7 @@ func _build_button() -> void:
 
 	# Time label above button
 	_time_label = Label.new()
-	_time_label.text = "10.00"
+	_time_label.text = "0.00"
 	_time_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_time_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_time_label.add_theme_font_size_override("font_size", 48)
@@ -93,18 +93,22 @@ func _connect_timer() -> void:
 
 
 func _on_timer_tick(display_time: float) -> void:
-	_time_display = display_time
+	# display_time is the actual countdown (10 → 9 → 8... → 0)
+	# We need to derive elapsed time from it
+	_elapsed_time = time_limit - display_time
 	_update_time_label()
 	_emit_progress()
 
 
 func _update_time_label() -> void:
 	if _is_negative_mode:
-		# Show negative value
-		_time_label.text = "-%.2f" % _time_display
+		# Show negative values increasing: 0 → -1 → -2...
+		var negative_display: float = -_elapsed_time
+		_time_label.text = "%.2f" % negative_display
 	else:
-		# Show positive value
-		_time_label.text = "%.2f" % _time_display
+		# Show positive countdown: 10 → 9 → 8...
+		var remaining: float = time_limit - _elapsed_time
+		_time_label.text = "%.2f" % remaining
 
 
 func _on_sign_removed() -> void:
@@ -125,14 +129,15 @@ func _handle_click() -> void:
 	if LevelTimer.has_timed_out():
 		return
 
-	# Win condition: click when display shows 0.00
-	var display_str: String = _time_label.text
-	if display_str == "0.00" or display_str == "-0.00":
+	# Win condition: click when elapsed_time reaches time_limit (countdown hits 0)
+	var remaining: float = time_limit - _elapsed_time
+	if remaining <= 0.01:  # Allow small tolerance
 		_time_label.text = "0.00"
 		_complete()
 	else:
-		var actual_time: float = _time_display
-		_fail("Clicked at %.2f, need 0.00!" % actual_time)
+		var display_value: float = _elapsed_time if _is_negative_mode else remaining
+		var prefix: String = "-" if _is_negative_mode else ""
+		_fail("Clicked at %s%.2f, need 0!" % [prefix, abs(display_value)])
 
 
 func _make_circle(radius: float, segments: int) -> PackedVector2Array:
@@ -156,4 +161,4 @@ func get_progress_text() -> String:
 		return "Complete!"
 	if not _is_negative_mode:
 		return "Sign removed - click at 0.00!"
-	return "Remove the negative sign or wait"
+	return "Remove the negative sign or wait for -10.00"
