@@ -1,35 +1,13 @@
 {
 	"levels": [
 		{
-			"id": "level_01_drag",
-			"title": "Level 1 — Drag & Drop",
-			"subtitle": "Drag the boxes into the drop zone.",
-			"timer_mode": "count_up",
-			"order": 10
-		},
-		{
-			"id": "level_02_platform",
-			"title": "Level 2 — Platformer",
-			"subtitle": "Reach the goal before the clock runs out.",
-			"timer_mode": "count_down",
-			"time_limit": 60.0,
-			"order": 20
-		},
-		{
-			"id": "level_03_topdown",
-			"title": "Level 3 — Top-Down",
-			"subtitle": "Escape the maze before time runs out.",
-			"timer_mode": "count_down",
-			"time_limit": 45.0,
-			"order": 30
-		},
-		{
 			"id": "level_07_stop_the_clock",
-			"title": "Level 7 — Stop the Clock",
-			"subtitle": "Click the button when the countdown hits 0.00 (within 0.25s).",
+			"title": "Level 1 — Stop the Clock",
+			"subtitle": "Click the button when the countdown hits 0.00.",
 			"timer_mode": "count_down",
 			"time_limit": 10.0,
-			"order": 70
+			"order": 10,
+			"record_time": false
 		}
 	]
 }

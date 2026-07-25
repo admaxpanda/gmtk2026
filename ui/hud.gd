@@ -15,6 +15,7 @@ var _complete_panel: PanelContainer
 var _complete_center: CenterContainer
 var _complete_time_label: Label
 var _next_btn: Button
+var _fail_label: Label
 var _is_paused: bool = false
 var _is_countdown: bool = false
 const _WARN_COLOR: Color = Color(0.95, 0.35, 0.35)
@@ -29,6 +30,7 @@ func _ready() -> void:
 	_hide_all()
 	SignalBus.level_started.connect(_on_level_started)
 	SignalBus.level_completed.connect(_on_level_completed)
+	SignalBus.level_failed.connect(_on_level_failed)
 	SignalBus.objective_progress.connect(_on_objective_progress)
 	LevelTimer.tick.connect(_on_timer_tick)
 
@@ -81,6 +83,19 @@ func _build_ui() -> void:
 	_hint_label.add_theme_font_size_override("font_size", 14)
 	_hint_label.add_theme_color_override("font_color", Color(0.85, 0.85, 0.85))
 	add_child(_hint_label)
+
+	# Full-screen fail overlay (shown briefly on level_failed before auto-reload).
+	_fail_label = Label.new()
+	_fail_label.name = "FailOverlay"
+	_fail_label.text = ""
+	_fail_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_fail_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_fail_label.add_theme_font_size_override("font_size", 48)
+	_fail_label.add_theme_color_override("font_color", _WARN_COLOR)
+	_fail_label.set_anchors_preset(Control.PRESET_FULL_RECT)
+	_fail_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_fail_label.visible = false
+	add_child(_fail_label)
 
 	_build_pause_panel()
 	_build_complete_panel()
@@ -180,6 +195,7 @@ func _hide_all() -> void:
 	_hint_label.visible = false
 	_pause_center.visible = false
 	_complete_center.visible = false
+	_fail_label.visible = false
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -207,6 +223,7 @@ func _on_restart() -> void:
 	get_tree().paused = false
 	_complete_center.visible = false
 	_pause_center.visible = false
+	_fail_label.visible = false
 	LevelManager.reload_current()
 
 
@@ -215,6 +232,7 @@ func _on_back_to_menu() -> void:
 	get_tree().paused = false
 	_complete_center.visible = false
 	_pause_center.visible = false
+	_fail_label.visible = false
 	LevelManager.go_to_menu()
 
 
@@ -222,6 +240,7 @@ func _on_next_level() -> void:
 	_is_paused = false
 	get_tree().paused = false
 	_complete_center.visible = false
+	_fail_label.visible = false
 	LevelManager.load_next_level()
 
 
@@ -231,10 +250,12 @@ func _on_level_started(level_id: String) -> void:
 	# persists across scene changes.
 	_is_paused = false
 	get_tree().paused = false
-	_root_panel.visible = true
+	# level_07 shows its own countdown above the button — hide the top-left HUD.
+	_root_panel.visible = level_id != "level_07_stop_the_clock"
 	_hint_label.visible = true
 	_complete_center.visible = false
 	_pause_center.visible = false
+	_fail_label.visible = false
 	_is_countdown = LevelTimer.is_countdown()
 	var best: float = SaveManager.get_best_time(level_id)
 	if _is_countdown:
@@ -252,13 +273,24 @@ func _on_level_started(level_id: String) -> void:
 func _on_level_completed(_level_id: String, time_seconds: float) -> void:
 	get_tree().paused = true
 	_complete_center.visible = true
-	var best: float = SaveManager.get_best_time(_level_id)
 	# Hide "Next Level" button if this was the final level.
 	_next_btn.visible = LevelManager.get_next_level_id() != ""
+	if _level_id == "level_07_stop_the_clock":
+		# No time/best recorded for this level — just show the completion notice.
+		_complete_time_label.visible = false
+		return
+	var best: float = SaveManager.get_best_time(_level_id)
+	_complete_time_label.visible = true
 	if _is_countdown:
 		_complete_time_label.text = "Time left: %s\nBest: %s left" % [_fmt(time_seconds), _fmt(best) if is_finite(best) else "--:--.---"]
 	else:
 		_complete_time_label.text = "Time: %s\nBest: %s" % [_fmt(time_seconds), _fmt(best) if is_finite(best) else "--:--.---"]
+
+
+func _on_level_failed(_level_id: String, reason: String) -> void:
+	# Shown during the brief auto-reload delay so the player sees why they failed.
+	_fail_label.text = "FAILED\n%s" % (reason if reason != "" else "Try again")
+	_fail_label.visible = true
 
 
 func _on_objective_progress(_ratio: float, text: String) -> void:
@@ -288,7 +320,7 @@ func _hint_for(level_id: String) -> String:
 		"level_03_topdown":
 			return "Top-Down: WASD or Arrows to move.   |   Esc: Pause   R: Reset"
 		"level_07_stop_the_clock":
-			return "Stop the Clock: Click the red button when the countdown hits 0.00 (within 0.25s).   |   Esc: Pause   R: Reset"
+			return "Stop the Clock: Click the red button when the countdown hits 0.00.   |   Esc: Pause   R: Reset"
 		_:
 			return "Esc: Pause   R: Reset"
 

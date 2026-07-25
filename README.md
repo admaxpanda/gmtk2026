@@ -14,22 +14,19 @@
 
 ### 关卡系统
 
-- **关卡管理** [feature/core/autoload/level_manager.gd](feature/core/autoload/level_manager.gd) — 关卡注册、解锁、进度追踪、失败后 0.6s 自动重载（带失败 ID 快照防误重载）
+- **关卡管理** [feature/core/autoload/level_manager.gd](feature/core/autoload/level_manager.gd) — 关卡注册、解锁、进度追踪、失败后 1.2s 自动重载（带失败 ID 快照防误重载）
 - **关卡基类** [feature/core/base_level.gd](feature/core/base_level.gd) — 自动发现 `LevelObjective` 子节点并桥接信号，超时默认触发失败
 - **目标系统** [feature/core/objective/](feature/core/objective/)
   - `LevelObjective` 抽象基类（completed/failed/progress 信号，幂等触发）
   - `ReachGoalObjective` — 玩家进入目标区域即通关
   - `DragAllToZoneObjective` — N 个拖拽物全部放入 DropZone 即通关
-  - `StopClockObjective` — 倒计时归零瞬间点击红色按钮（容差 ±0.25s）即通关，按钮上实时显示 2 位小数倒计时
+  - `StopClockObjective` — 倒计时归零瞬间点击红色按钮即通关，按钮上方实时显示 2 位小数倒计时
 
-关卡元数据集中定义在 [scenes/levels/levels.json](scenes/levels/levels.json)（id / title / subtitle / timer_mode / time_limit / order），新增关卡只需追加一条记录：
+关卡元数据集中定义在 [scenes/levels/levels.json](scenes/levels/levels.json)（id / title / subtitle / timer_mode / time_limit / order / record_time），新增关卡只需追加一条记录：
 
 | 关卡 | 玩法 | 计时模式 |
 |------|------|---------|
-| level_01_drag | 拖拽 N 个方块进 DropZone | 正计时 |
-| level_02_platform | 平台跳跃到达终点 | 60s 倒计时 |
-| level_03_topdown | 俯视角逃离迷宫 | 45s 倒计时 |
-| level_07_stop_the_clock | 倒计时归零瞬间点击红色按钮（±0.25s 容差） | 10s 倒计时 |
+| level_07_stop_the_clock | 倒计时归零瞬间点击红色按钮 | 10s 倒计时（不记录通关时间） |
 
 ### 双模式计时器
 
@@ -100,12 +97,9 @@ GMTK_COUNTDOWN/
 │   ├── platformer/player_platformer.gd
 │   └── topdown/player_topdown.gd
 ├── scenes/
-│   ├── main_menu.gd/.tscn     # 关卡选择菜单（锁定/解锁、进度统计）
+│   ├── main_menu.gd/.tscn     # 主菜单（入口，跳转到关卡选择）
 │   └── levels/
-│       ├── levels.json                # 关卡元数据（id/title/timer_mode/time_limit/order）
-│       ├── level_01_drag.gd           # DragAllToZone + 正计时
-│       ├── level_02_platform.gd       # ReachGoal + 60s 倒计时
-│       ├── level_03_topdown.gd        # ReachGoal + 45s 倒计时
+│       ├── levels.json                # 关卡元数据（id/title/timer_mode/time_limit/order/record_time）
 │       └── level_07_stop_the_clock.gd # StopClock + 10s 倒计时（点击精度挑战）
 ├── tests/                     # 7 个独立测试场景 + 测试菜单
 └── ui/hud.gd/.tscn            # 持久化 HUD + 暂停/完成面板
@@ -149,7 +143,7 @@ GMTK_COUNTDOWN/
 
 - **单调时钟计时** — `Time.get_ticks_msec()` 而非累计 delta，跨暂停/恢复保持准确
 - **Coyote Time + Jump Buffering** — 平台跳跃的专业手感标准
-- **失败自动重载** — 0.6s 延迟让玩家看清失败原因，带 `failed_id` 快照防止切换关卡后误重载
+- **失败自动重载** — 1.2s 延迟让玩家看清失败原因，带 `failed_id` 快照防止切换关卡后误重载
 - **HUD PROCESS_MODE_ALWAYS** — 暂停时菜单仍可交互
 - **背景 Control `mouse_filter = IGNORE`** — 防止全屏 ColorRect/CenterContainer 拦截 Area2D 的 `input_event`
 - **`_visual.scale` 而非 `scale`** — 拖拽视觉反馈只缩放 Polygon2D，不影响 CollisionShape2D，避免 DropZone 计数抖动
