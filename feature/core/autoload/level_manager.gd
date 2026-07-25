@@ -15,6 +15,7 @@ const AUTO_RELOAD_ON_FAIL_SEC: float = 1.2
 
 var _current_level_id: String = ""
 var _is_reloading_after_fail: bool = false
+var _dev_mode: bool = false  # When true, skip unlock checks (test mode)
 
 
 # ---------- Lifecycle ----------
@@ -84,6 +85,11 @@ func get_progress() -> Dictionary:
 	}
 
 
+## Enable/disable dev mode. When true, load_level skips unlock checks.
+func set_dev_mode(enabled: bool) -> void:
+	_dev_mode = enabled
+
+
 # ---------- Transitions ----------
 
 func load_level(level_id: String) -> void:
@@ -91,7 +97,8 @@ func load_level(level_id: String) -> void:
 	if not entry.has("path"):
 		push_error("[LevelManager] Unknown level id: %s" % level_id)
 		return
-	if not is_level_unlocked(level_id):
+	# Skip unlock check in dev mode (test scene)
+	if not _dev_mode and not is_level_unlocked(level_id):
 		push_warning("[LevelManager] Level '%s' is locked." % level_id)
 		return
 	_current_level_id = level_id

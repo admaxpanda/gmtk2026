@@ -1,0 +1,15 @@
+- [x] `StopClockObjective` extends `LevelObjective` and builds a red clickable `Area2D` button with a centered 2-decimal countdown `Label`.
+- [x] Clicking while `abs(remaining - target_remaining) <= tolerance` (default 0.25) calls `_complete()` (idempotent).
+- [x] Clicking outside tolerance calls `_fail(reason)` with a message showing the stopped time (idempotent); level auto-reloads after 0.6s.
+- [x] Countdown reaching 0.00 without a valid click fails the level via `LevelTimer.timed_out` → `BaseLevel` default handler (objective not completed).
+- [x] On-button `Label` updates every frame from `LevelTimer.tick`, formatted to exactly 2 decimals.
+- [x] `get_progress_text()` returns the current remaining time (e.g., "0.42s left") for the HUD objective label.
+- [x] Objective is safe in preview/SubViewport mode: builds visuals, triggers no game logic (no `tick`, input disabled).
+- [x] `level_07_stop_the_clock.gd` extends `BaseLevel` and adds a `StopClockObjective` at screen center in `_build_level()`.
+- [x] `level_07_stop_the_clock.tscn` is a minimal root `Node2D` with the script attached (no extra nodes).
+- [x] `levels.json` has the new entry: `timer_mode=count_down`, `time_limit=10.0`, `order=70`, correct id/title/subtitle.
+- [x] `hud.gd` `_hint_for()` returns a meaningful hint for `level_07_stop_the_clock`.
+- [x] Background `ColorRect` uses `mouse_filter = IGNORE` so clicks reach the button (BaseLevel default, verified not broken).
+- [x] `README.md` documents the new level and the `StopClockObjective`.
+- [x] Code review passed (no correctness or convention issues; respects signal-up architecture, no circular coupling).
+- [x] All changes committed and pushed to the remote repository.

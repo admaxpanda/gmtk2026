@@ -1,0 +1,11 @@
+- [x] level_select.gd 使用 SubViewport 运行时生成缩略图
+- [x] 缩略图缓存机制存在（_thumbnail_cache），避免重复渲染
+- [x] SubViewport 渲染后立即释放实例和视口，不持续占用内存
+- [x] 生成缩略图分辨率为 320x180（2x 显示尺寸）
+- [x] 未解锁关卡缩略图显示灰色调（modulate 效果）
+- [x] 场景加载失败时显示占位图
+- [x] base_level.gd 不再包含 thumbnail_path @export
+- [x] level_manager.gd 不再包含 get_level_thumbnail 方法和 thumbnail_path 字段
+- [x] thumbnail_generator.gd 已删除
+- [x] assets/thumbnails/ 目录已删除
+- [x] 缩略图显示不影响卡片中其他 UI 元素（标题、按钮等）
