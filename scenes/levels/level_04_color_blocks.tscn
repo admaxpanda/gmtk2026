@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://blevel04color00"]
+
+[ext_resource type="Script" path="res://scenes/levels/level_04_color_blocks.gd" id="1_l4"]
+
+[node name="Level04ColorBlocks" type="Node2D"]
+script = ExtResource("1_l4")
+title = "Color Blocks"
+subtitle = "A grid of colorful blocks."
+timer_mode = "count_up"
+time_limit = 0.0
+order = 4

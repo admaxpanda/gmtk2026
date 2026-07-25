@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://blevel05narow00"]
+
+[ext_resource type="Script" path="res://scenes/levels/level_05_narrow_path.gd" id="1_l5"]
+
+[node name="Level05NarrowPath" type="Node2D"]
+script = ExtResource("1_l5")
+title = "Narrow Path"
+subtitle = "A winding corridor of walls."
+timer_mode = "count_down"
+time_limit = 30.0
+order = 5

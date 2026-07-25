@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bdbtclbg2w450"]
+
+[ext_resource type="Script" path="res://scenes/levels/level_04_negative_sign.gd" id="1_l4"]
+
+[node name="Level04NegativeSign" type="Node2D"]
+script = ExtResource("1_l4")

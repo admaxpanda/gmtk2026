@@ -1,0 +1,11 @@
+[gd_scene load_steps=2 format=3 uid="uid://blevel06scat000"]
+
+[ext_resource type="Script" path="res://scenes/levels/level_06_scatter.gd" id="1_l6"]
+
+[node name="Level06Scatter" type="Node2D"]
+script = ExtResource("1_l6")
+title = "Scatter Field"
+subtitle = "Random obstacles on a dark field."
+timer_mode = "count_down"
+time_limit = 45.0
+order = 6

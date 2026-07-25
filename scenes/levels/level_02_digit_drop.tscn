@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://douukhyc851vf"]
+
+[ext_resource type="Script" path="res://scenes/levels/level_02_digit_drop.gd" id="1_l2"]
+
+[node name="Level02DigitDrop" type="Node2D"]
+script = ExtResource("1_l2")
