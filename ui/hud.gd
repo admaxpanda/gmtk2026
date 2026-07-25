@@ -254,9 +254,9 @@ func _on_level_started(level_id: String) -> void:
 	# persists across scene changes.
 	_is_paused = false
 	get_tree().paused = false
-	# level_07 shows its own countdown above the button — hide the top-left HUD.
-	_root_panel.visible = level_id != "level_07_stop_the_clock"
-	_hint_label.visible = true
+	# Hide all HUD info for clean gameplay
+	_root_panel.visible = false
+	_hint_label.visible = false
 	_complete_center.visible = false
 	_pause_center.visible = false
 	_fail_label.visible = false
