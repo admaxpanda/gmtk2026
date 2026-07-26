@@ -22,8 +22,11 @@ var _is_trashed: bool = false
 func _ready() -> void:
 	input_pickable = true
 	collision_layer = 1 << 3  # draggable layer
-	collision_mask = 0
-	monitoring = false
+	# Monitor the drop-zone layer (4) so get_overlapping_areas() reports the
+	# TrashBin on drop. Without this the bin is never detected and the block
+	# always snaps back.
+	collision_mask = 1 << 4
+	monitoring = true
 	monitorable = true
 
 	_build_visual()

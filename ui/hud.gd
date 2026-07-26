@@ -157,7 +157,7 @@ func _build_complete_panel() -> void:
 	_complete_panel.add_child(vb)
 
 	var title := Label.new()
-	title.text = "LEVEL COMPLETE"
+	title.text = "通关"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 32)
 	vb.add_child(title)
@@ -279,21 +279,14 @@ func _on_level_completed(_level_id: String, time_seconds: float) -> void:
 	_complete_center.visible = true
 	# Hide "Next Level" button if this was the final level.
 	_next_btn.visible = LevelManager.get_next_level_id() != ""
-	if _level_id == "level_07_stop_the_clock":
-		# No time/best recorded for this level — just show the completion notice.
-		_complete_time_label.visible = false
-		return
-	var best: float = SaveManager.get_best_time(_level_id)
-	_complete_time_label.visible = true
-	if _is_countdown:
-		_complete_time_label.text = "Time left: %s\nBest: %s left" % [_fmt(time_seconds), _fmt(best) if is_finite(best) else "--:--.---"]
-	else:
-		_complete_time_label.text = "Time: %s\nBest: %s" % [_fmt(time_seconds), _fmt(best) if is_finite(best) else "--:--.---"]
+	# 简化通关信息：只显示「通关」，不再展示时间 / 最佳记录等冗余内容。
+	_complete_time_label.visible = false
 
 
-func _on_level_failed(_level_id: String, reason: String) -> void:
-	# Shown during the brief auto-reload delay so the player sees why they failed.
-	_fail_label.text = "FAILED\n%s" % (reason if reason != "" else "Try again")
+func _on_level_failed(_level_id: String, _reason: String) -> void:
+	# Shown during the brief auto-reload delay. The detailed reason is logged
+	# by LevelManager.print() for debugging; the overlay itself stays minimal.
+	_fail_label.text = "关卡失败"
 	_fail_label.visible = true
 
 

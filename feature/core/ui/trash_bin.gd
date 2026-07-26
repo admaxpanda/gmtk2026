@@ -23,7 +23,11 @@ func _ready() -> void:
 	collision_layer = 1 << 4  # drop zone layer
 	collision_mask = 1 << 3  # detect draggable/virtual timer
 	monitoring = is_functional
-	monitorable = false
+	# Must be monitorable so draggables (which monitor the drop-zone layer) can
+	# detect this bin via get_overlapping_areas() on drop. Decorative bins stay
+	# non-interactive because is_functional is false (monitoring off) — but they
+	# still aren't a valid drop target since monitorable follows is_functional too.
+	monitorable = is_functional
 
 	_build_ui()
 

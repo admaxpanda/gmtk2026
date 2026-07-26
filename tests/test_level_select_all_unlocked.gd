@@ -86,9 +86,6 @@ func _populate_cards() -> void:
 func _make_card(level_id: String) -> Control:
 	var meta: Dictionary = LevelManager.get_level_metadata(level_id)
 	# 开发模式：强制所有关卡为解锁状态
-	var unlocked: bool = true
-	var is_countdown: bool = meta.get("timer_mode", "count_up") == "count_down"
-	var time_limit: float = float(meta.get("time_limit", 0.0))
 
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(360, 220)
@@ -107,62 +104,29 @@ func _make_card(level_id: String) -> Control:
 
 	var vb := VBoxContainer.new()
 	vb.add_theme_constant_override("separation", 6)
+	# 让点击穿透到卡片本身，使整张卡片可点击
+	vb.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	card.add_child(vb)
 
 	# 缩略图 (160x90, 居中) — 运行时通过 SubViewport 生成
 	var thumb: Control = await _make_thumbnail(level_id)
 	vb.add_child(thumb)
 
-	# 标题
+	# 关卡名称（卡片上唯一显示的文本）
 	var title := Label.new()
 	title.text = meta.get("title", level_id)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 24)
+	title.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	vb.add_child(title)
 
-	# 副标题
-	var subtitle := Label.new()
-	subtitle.text = meta.get("subtitle", "")
-	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.add_theme_font_size_override("font_size", 14)
-	subtitle.add_theme_color_override("font_color", Color(0.7, 0.7, 0.75))
-	vb.add_child(subtitle)
-
-	# 计时模式
-	var mode := Label.new()
-	if is_countdown:
-		mode.text = "Count Down %ds" % int(time_limit)
-	else:
-		mode.text = "Count Up"
-	mode.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	mode.add_theme_font_size_override("font_size", 14)
-	mode.add_theme_color_override("font_color", Color(0.6, 0.7, 0.85))
-	vb.add_child(mode)
-
-	# 最佳时间
-	var best := Label.new()
-	best.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	best.add_theme_font_size_override("font_size", 14)
-	var best_time: float = SaveManager.get_best_time(level_id)
-	if SaveManager.has_level_data(level_id) and is_finite(best_time):
-		var best_text: String = "Best: " + _format_time(best_time)
-		if is_countdown:
-			best_text += " remaining"
-		best.text = best_text
-		best.add_theme_color_override("font_color", Color(0.55, 0.85, 0.55))
-	else:
-		best.text = "Best: --"
-		best.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
-	vb.add_child(best)
-
-	# Play 按钮（始终可点击）
-	var play_btn := Button.new()
-	play_btn.custom_minimum_size = Vector2(140, 40)
-	play_btn.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-	play_btn.text = "Play"
-	play_btn.disabled = false
-	play_btn.pressed.connect(func(): LevelManager.load_level(level_id))
-	vb.add_child(play_btn)
+	# 开发模式：整张卡片可点击进入关卡（取代原 Play 按钮）
+	card.mouse_filter = Control.MOUSE_FILTER_STOP
+	card.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	card.gui_input.connect(func(event: InputEvent):
+		if event is InputEventMouseButton and event.pressed \
+				and event.button_index == MOUSE_BUTTON_LEFT:
+			LevelManager.load_level(level_id))
 
 	return card
 
@@ -189,10 +153,13 @@ func _make_thumbnail(level_id: String) -> Control:
 		return _make_placeholder()
 
 	# 创建离屏 SubViewport 渲染关卡场景
-	# 640x360 是 160x90 显示尺寸的 2 倍 — 对于 hi-DPI 足够清晰，
-	# 而不需要 1280x720 的 4 倍渲染成本
+	# 尺寸设为游戏设计视口（1920x1080），使抓取区域与玩家进入关卡时看到的
+	# 完全一致。关卡没有 Camera2D，若 SubViewport 小于设计视口，只会渲染到
+	# 关卡左上角的一小块（被严重放大裁切）。
+	var vp_w: int = ProjectSettings.get_setting("display/window/size/viewport_width", 1920)
+	var vp_h: int = ProjectSettings.get_setting("display/window/size/viewport_height", 1080)
 	var vp := SubViewport.new()
-	vp.size = Vector2i(640, 360)
+	vp.size = Vector2i(vp_w, vp_h)
 	vp.render_target_update_mode = SubViewport.UPDATE_ONCE
 	vp.transparent_bg = false
 	add_child(vp)
@@ -256,14 +223,6 @@ func _make_placeholder() -> Control:
 	placeholder.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	placeholder.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	return placeholder
-
-
-func _format_time(seconds: float) -> String:
-	var s: float = max(seconds, 0.0)
-	var mins: int = int(s) / 60
-	var secs: int = int(s) % 60
-	var ms: int = int(fmod(s, 1.0) * 1000)
-	return "%02d:%02d.%03d" % [mins, secs, ms]
 
 
 func _on_back_pressed() -> void:

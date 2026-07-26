@@ -12,8 +12,14 @@ extends Area2D
 signal dropped_in_trash
 signal snapped_back
 
-@export var panel_size: Vector2 = Vector2(160, 60)
+@export var panel_size: Vector2 = Vector2(170, 100)
 @export var font_size: int = 28
+# Horizontal alignment of the digits inside the bordered panel. Defaults to
+# CENTER. Set to RIGHT when the VirtualTimer sits immediately left of another
+# counter so the digits hug the shared boundary and the panel border does not
+# push the glyphs inward (which would make them look smaller than their
+# neighbour). See DigitDropObjective.
+@export var text_alignment: int = HORIZONTAL_ALIGNMENT_CENTER
 @export var bg_color: Color = Color(0.12, 0.14, 0.18)
 @export var text_color: Color = Color(0.95, 0.95, 0.95)
 
@@ -28,8 +34,11 @@ var _is_trashed: bool = false
 func _ready() -> void:
 	input_pickable = true
 	collision_layer = 1 << 3  # clickable/draggable layer
-	collision_mask = 0
-	monitoring = false
+	# Monitor the drop-zone layer (4) so get_overlapping_areas() reports the
+	# TrashBin on drop. Without this the bin is never detected and the timer
+	# always snaps back.
+	collision_mask = 1 << 4
+	monitoring = true
 	monitorable = true
 
 	_build_ui()
@@ -42,6 +51,10 @@ func _build_ui() -> void:
 	# Panel container for background
 	_panel = PanelContainer.new()
 	_panel.custom_minimum_size = panel_size
+	# Center the panel on the Area2D origin so the visible timer aligns with its
+	# collision shape (and with sibling UI placed by world position). Without this
+	# the Control renders offset down-right of the drag/click origin.
+	_panel.position = -panel_size * 0.5
 	var style := StyleBoxFlat.new()
 	style.bg_color = bg_color
 	style.corner_radius_top_left = 8
@@ -53,15 +66,20 @@ func _build_ui() -> void:
 	style.content_margin_top = 8
 	style.content_margin_bottom = 8
 	_panel.add_theme_stylebox_override("panel", style)
+	# This Control sits over the clickable area. With the default mouse_filter it
+	# swallows mouse input and the Area2D.input_event (drag trigger) never fires,
+	# so the virtual timer can't be grabbed. Ignore mouse so picking hits the Area2D.
+	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_panel)
 
 	# Label for displaying high digits
 	_label = Label.new()
 	_label.text = "0"
-	_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_label.horizontal_alignment = text_alignment
 	_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_label.add_theme_font_size_override("font_size", font_size)
 	_label.add_theme_color_override("font_color", text_color)
+	_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_panel.add_child(_label)
 
 	# Collision shape for drag detection

@@ -21,7 +21,7 @@ var _visual: ColorRect
 func _ready() -> void:
 	_original_position = position
 	collision_layer = 1 << 1  # solid (blocks player)
-	collision_mask = 0
+	collision_mask = 1 << 0   # collide with / detect the player
 
 	_build_visual()
 
@@ -40,6 +40,17 @@ func _build_visual() -> void:
 	shape.size = panel_size
 	col.shape = shape
 	add_child(col)
+
+	# Explicit collision cap at the very top of the panel so its top is a clean,
+	# reliable standable surface (the player can land on / stand on the panel top
+	# rather than clipping the thin top edge of the full-body shape).
+	var top_cap := CollisionShape2D.new()
+	top_cap.name = "TopCap"
+	var top_shape := RectangleShape2D.new()
+	top_shape.size = Vector2(panel_size.x, 16.0)
+	top_cap.shape = top_shape
+	top_cap.position = Vector2(0.0, -panel_size.y * 0.5 - 8.0)
+	add_child(top_cap)
 
 
 ## Called when the linked platform moves. delta_y > 0 means platform sank,

@@ -21,8 +21,9 @@
 		{
 			"id": "level_03_clear_path",
 			"title": "Level 3 — Clear Path",
-			"subtitle": "Drag the blue block to the trash, then click the button.",
-			"timer_mode": "count_up",
+			"subtitle": "Drag the blue block to the trash, then click the button when the countdown hits 0.00.",
+			"timer_mode": "count_down",
+			"time_limit": 10.0,
 			"order": 30,
 			"record_time": false
 		},
@@ -38,9 +39,9 @@
 		{
 			"id": "level_05_pulley",
 			"title": "Level 5 — Pulley",
-			"subtitle": "Jump on the platform to raise the panel, then reach the button.",
+			"subtitle": "Raise the panel, then click the button when the countdown hits 0.00.",
 			"timer_mode": "count_down",
-			"time_limit": 30.0,
+			"time_limit": 10.0,
 			"order": 50,
 			"record_time": false
 		}

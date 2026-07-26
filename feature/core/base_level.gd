@@ -9,6 +9,16 @@ extends Node2D
 
 var _objective: LevelObjective
 
+# --- Level audio ---
+# ticktock: looping ambience that plays for the whole level, stopped on win/fail.
+# ring: one-shot celebratory jingle, played for RING_DURATION_SEC on clear.
+var TICKTOCK_STREAM: AudioStreamMP3 = preload("res://ingame/ticktock.mp3")
+const RINGING_STREAM: AudioStreamMP3 = preload("res://ingame/ringing.mp3")
+const RING_DURATION_SEC: float = 1.0
+
+var _ticktock_player: AudioStreamPlayer
+var _ring_player: AudioStreamPlayer
+
 
 func _ready() -> void:
 	_build_background()
@@ -24,6 +34,10 @@ func _ready() -> void:
 	# Countdown expiry → default failure. Override _on_timer_timed_out for
 	# "survive the timer" win conditions.
 	LevelTimer.timed_out.connect(_on_timer_timed_out)
+	# --- Level audio: ticktock ambience + clear jingle (applies to every level) ---
+	_setup_level_audio()
+	SignalBus.level_completed.connect(_on_audio_level_completed)
+	SignalBus.level_failed.connect(_on_audio_level_failed)
 
 
 func _find_objective() -> LevelObjective:
@@ -77,6 +91,66 @@ func _on_objective_progress(ratio: float, text: String) -> void:
 func _on_timer_timed_out() -> void:
 	if _objective != null and not _objective.is_completed():
 		_on_objective_failed("Time's up!")
+
+
+# --- Level audio (ticktock ambience + clear jingle) ---
+
+func _setup_level_audio() -> void:
+	# Ticktock: looping background ambience for the whole level.
+	_ticktock_player = AudioStreamPlayer.new()
+	_ticktock_player.name = "TicktockPlayer"
+	_ticktock_player.stream = TICKTOCK_STREAM
+	_ticktock_player.bus = &"Master"
+	# Loop at runtime so we don't have to reimport the asset with loop=true.
+	if TICKTOCK_STREAM != null:
+		TICKTOCK_STREAM.loop = true
+	add_child(_ticktock_player)
+	_ticktock_player.play()
+
+	# Ring: one-shot celebratory jingle, triggered on level clear.
+	_ring_player = AudioStreamPlayer.new()
+	_ring_player.name = "RingPlayer"
+	_ring_player.stream = RINGING_STREAM
+	_ring_player.bus = &"Master"
+	add_child(_ring_player)
+
+
+func _on_audio_level_completed(_level_id: String, _time: float) -> void:
+	_stop_ticktock()
+	_play_ring()
+
+
+func _on_audio_level_failed(_level_id: String, _reason: String) -> void:
+	_stop_ticktock()
+
+
+func _stop_ticktock() -> void:
+	if is_instance_valid(_ticktock_player) and _ticktock_player.playing:
+		_ticktock_player.stop()
+
+
+func _play_ring() -> void:
+	var player := _ring_player
+	if not is_instance_valid(player):
+		return
+	player.stop()
+	player.play()
+	# Stop the jingle after RING_DURATION_SEC. The timer uses PROCESS_MODE_ALWAYS
+	# so it still fires while the tree is paused on the completion screen, and it
+	# is a child node so it's cleaned up automatically on scene change.
+	var ring_timer := Timer.new()
+	ring_timer.name = "RingStopTimer"
+	ring_timer.wait_time = RING_DURATION_SEC
+	ring_timer.one_shot = true
+	ring_timer.process_mode = Node.PROCESS_MODE_ALWAYS
+	ring_timer.timeout.connect(_on_ring_timer_timeout.bind(player))
+	add_child(ring_timer)
+	ring_timer.start()
+
+
+func _on_ring_timer_timeout(player: AudioStreamPlayer) -> void:
+	if is_instance_valid(player):
+		player.stop()
 
 
 # --- Helper for subclasses: build a solid static rectangle (floor/wall/platform) ---

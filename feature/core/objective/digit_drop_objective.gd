@@ -3,8 +3,8 @@ extends LevelObjective
 ## Level 2 objective: Digit Drop.
 ## - Start with 11110 seconds (virtual timer shows "1111", main shows "0")
 ## - Player can drag virtual timer to trash bin to truncate time to units digit
-## - Win condition: click the button when units digit is 0 (with or without trashing)
-## - Fail condition: click too early (units digit > 0) or timer reaches 0 without click
+## - Win condition: first drop the virtual timer into the trash to truncate time to its units digit, then click when the remaining total reaches 0
+## - Fail condition: click before dropping the virtual timer, click too early (remaining > 0), or timer reaches 0 without click
 
 @export var button_position: Vector2 = Vector2(960, 540)
 @export var button_radius: float = 110.0
@@ -34,21 +34,46 @@ func _ready() -> void:
 
 
 func _build_virtual_timer() -> void:
-	# Virtual timer (high digits) on the left side of the display
+	# Shared row geometry so the virtual (high-digit) timer and the main (units)
+	# timer form one aligned number row with a common baseline.
+	var row_width: float = 170.0
+	var row_height: float = 100.0
+	var center_x: float = timer_display_position.x
+	var center_y: float = timer_display_position.y
+
+	# The main counter renders its digits at font size 64. To make the virtual
+	# counter's digits the SAME size, give it the same font size. The virtual
+	# counter is wrapped in a Panel with a 12px content border, so we also
+	# Right-align its digits against the inner right edge: that way the number
+	# hugs the shared boundary with the main counter and the border does not
+	# crowd the glyphs or make them look smaller than the main counter's.
+	var main_font_size: int = 64
+	var inner_gap: float = 12.0  # spacing between the virtual border and the main digits
+
+	# Virtual timer (high digits) on the left side of the display.
 	_virtual_timer = VirtualTimer.new()
-	_virtual_timer.position = timer_display_position - Vector2(100, 0)  # Left side
+	_virtual_timer.panel_size = Vector2(row_width, row_height)
+	_virtual_timer.font_size = main_font_size
+	_virtual_timer.text_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_virtual_timer.position = Vector2(center_x - 100, center_y)
 	_virtual_timer.dropped_in_trash.connect(_on_virtual_timer_trashed)
 	add_child(_virtual_timer)
 
-	# Units digit label on the right side of the display
+	# Units digit label on the right side. Same font size as the virtual counter
+	# so the two halves read as one continuous number. Left-align it and sit it
+	# immediately to the right of the virtual timer's border (inner_gap) so the
+	# digit spacing between the last high digit and the first units digit matches
+	# the natural spacing inside each half, making the display read as "11110.00".
+	var virtual_right_edge: float = _virtual_timer.position.x + row_width * 0.5
 	_units_label = Label.new()
 	_units_label.text = "0"
-	_units_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_units_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_units_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_units_label.add_theme_font_size_override("font_size", 64)
+	_units_label.add_theme_font_size_override("font_size", main_font_size)
 	_units_label.add_theme_color_override("font_color", Color.WHITE)
-	_units_label.position = timer_display_position + Vector2(100, 0) - Vector2(40, 30)  # Right side
-	_units_label.custom_minimum_size = Vector2(80, 60)
+	_units_label.custom_minimum_size = Vector2(row_width, row_height)
+	_units_label.size = Vector2(row_width, row_height)
+	_units_label.position = Vector2(virtual_right_edge + inner_gap, center_y - row_height * 0.5)
 	add_child(_units_label)
 
 
@@ -102,14 +127,12 @@ func _on_timer_truncated(_units: int) -> void:
 
 
 func _update_display() -> void:
-	if _is_truncated:
-		# After truncation, show the remaining units digit
-		var units: int = LevelTimer.get_units_digit()
-		_units_label.text = "%d" % units
-	else:
-		# Before truncation, show units digit
-		var units: int = LevelTimer.get_units_digit()
-		_units_label.text = "%d" % units
+	# Main timer shows the units "slot" of the countdown (time mod 10) with
+	# 2-decimal precision. Combined with the VirtualTimer's high digits this equals
+	# the actual time: virtual_high_digits * 10 + this_remainder.
+	var display_time: float = LevelTimer.get_display_time()
+	var main_value: float = fmod(display_time, 10.0)
+	_units_label.text = "%.2f" % main_value
 
 
 func _on_button_input(_viewport: Node, event: InputEvent, _shape_idx: int) -> void:
@@ -126,13 +149,22 @@ func _handle_click() -> void:
 	if LevelTimer.has_timed_out():
 		return
 
-	# Win condition: click when units digit is 0
-	var units: int = LevelTimer.get_units_digit()
+	# Win condition is evaluated on the SUM of the virtual (high digits) and the
+	# main (units) counters — i.e. the actual remaining time. You must first drop
+	# the virtual timer into the trash to truncate the time down to its units
+	# digit; only then does clicking at 0 (the truncated total reaching 0) win.
+	if not _is_truncated:
+		_fail("Drop the virtual timer into the trash first!")
+		return
+
+	var total_time: float = LevelTimer.get_high_digits() * 10.0 + fmod(LevelTimer.get_display_time(), 10.0)
+	var units: int = int(total_time) % 10
 	if units == 0:
-		_units_label.text = "0"
+		_units_label.text = "0.00"
 		_complete()
 	else:
-		_fail("Clicked at %d, need 0!" % units)
+		var main_value: float = fmod(LevelTimer.get_display_time(), 10.0)
+		_fail("Clicked at %.2f, need 0.00! (total %.2f)" % [main_value, total_time])
 
 
 func _on_virtual_timer_trashed() -> void:

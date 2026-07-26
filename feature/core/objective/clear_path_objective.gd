@@ -2,8 +2,9 @@ class_name ClearPathObjective
 extends LevelObjective
 ## Level 3 objective: Clear Path.
 ## - A blue paper block covers the button
-## - Player must drag the block to trash bin to reveal the button
-## - Then click the button to complete the level
+## - Player must drag the block to trash bin to reveal the button (gate)
+## - Then click the button when the countdown hits `target_remaining` (within
+##   `tolerance`) to win. Time is the win condition (ref. Level 1: Stop the Clock).
 
 @export var button_position: Vector2 = Vector2(960, 540)
 @export var button_radius: float = 110.0
@@ -12,6 +13,8 @@ extends LevelObjective
 @export var block_color: Color = Color(0.25, 0.45, 0.75)
 @export var trash_bin_position: Vector2 = Vector2(1720, 930)
 @export var timer_display_position: Vector2 = Vector2(960, 200)  # Center-top for timer display
+@export var target_remaining: float = 0.0  # Win by clicking when remaining time hits this (ref. Level 1)
+@export var tolerance: float = 0.25  # +/- window around target_remaining
 
 var _button: Area2D
 var _timer_label: Label
@@ -107,12 +110,23 @@ func _on_button_input(_viewport: Node, event: InputEvent, _shape_idx: int) -> vo
 func _handle_click() -> void:
 	if _is_completed or _is_failed:
 		return
-
-	# Can only click after block is removed
+	# Late clicks after the countdown expired are handled by BaseLevel's
+	# timed_out (level fails), so block them explicitly (matches Level 1).
+	if LevelTimer.has_timed_out():
+		return
+	# The button is covered by the block until the path is cleared.
+	# Clicking before that is meaningless — ignore (puzzle gate, not a fail).
 	if not _is_block_removed:
 		return
-
-	_complete()
+	# Path is clear: the win condition is purely time-based, like Level 1
+	# (Stop the Clock). Click within `tolerance` of `target_remaining` to win;
+	# clicking at the wrong time fails ("Too early!").
+	var remaining: float = LevelTimer.get_remaining()
+	if abs(remaining - target_remaining) <= tolerance:
+		_timer_label.text = "0.00"
+		_complete()
+	else:
+		_fail("Too early!")
 
 
 func _on_block_trashed() -> void:
@@ -129,16 +143,14 @@ func _make_circle(radius: float, segments: int) -> PackedVector2Array:
 
 
 func get_progress_ratio() -> float:
-	if _is_completed:
-		return 1.0
-	if _is_block_removed:
-		return 0.5
-	return 0.0
+	return 1.0 if _is_completed else 0.0
 
 
 func get_progress_text() -> String:
 	if _is_completed:
 		return "Complete!"
-	if _is_block_removed:
-		return "Block removed - click the button!"
-	return "Drag the blue block to the trash"
+	if not _is_block_removed:
+		return "Drag the blue block to the trash"
+	if LevelTimer.is_countdown():
+		return "%.2fs left — click at 0.00" % LevelTimer.get_remaining()
+	return ""

@@ -3,7 +3,9 @@ extends BaseLevel
 ## Level 5 — Pulley.
 ## Player controls a platformer character. A panel covers the button.
 ## Jump on the pulley platform to sink it, raising the panel via the rope.
-## When the panel is raised, jump onto the button to complete the level.
+## Once the panel is raised, the button can be clicked — and the level only
+## completes if the player clicks it within the 0.00 win window. Reaching
+## 0.00 without a winning click FAILS the level (BaseLevel default).
 
 
 func _ready() -> void:

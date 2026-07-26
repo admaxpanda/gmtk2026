@@ -23,6 +23,9 @@ extends CharacterBody2D
 @export var gravity: float = 1200.0
 @export var max_fall_speed: float = 900.0
 
+@export_group("Collision")
+@export var collision_size: Vector2 = Vector2(40.0, 124.0)
+
 var _coyote_timer: float = 0.0
 var _jump_buffer_timer: float = 0.0
 var _is_jump_held: bool = false
@@ -35,19 +38,35 @@ func _ready() -> void:
 
 
 func _build_visual() -> void:
-	var rect := ColorRect.new()
-	rect.name = "Visual"
-	rect.size = Vector2(36, 52)
-	rect.color = Color(0.35, 0.75, 0.95)
-	rect.position = Vector2(-18, -26)
-	add_child(rect)
-	# Origin sits at the bottom-center so it aligns with the collision shape.
+	# Collision box MUST fully enclose the visible character so the player
+	# can't slip through the small gaps the sprite overlaps. Default 40x124:
+	#   - 40px wide: fully covers the ~36px-wide (0.29-scaled) player sprite
+	#     with ~2px margin each side. Deliberately >= the visual so no part of
+	#     the body pokes outside the hitbox (a narrower box let the body slip
+	#     through gaps — the bug we're fixing).
+	#   - 124px tall: covers the full ~121px-tall sprite (feet at origin up to
+	#     the crown) plus a couple px of headroom.
+	#   - BOTTOM edge sits at the origin == the sprite's feet. The old 36x52
+	#     stub was centered on the origin: its bottom floated 26px below the
+	#     feet and it was far shorter than the body, so the upper body had no
+	#     collision and the player slipped through gaps.
+	var w: float = collision_size.x
+	var h: float = collision_size.y
+
 	var col := CollisionShape2D.new()
 	col.name = "Collision"
 	var shape := RectangleShape2D.new()
-	shape.size = Vector2(36, 52)
+	shape.size = Vector2(w, h)
 	col.shape = shape
+	col.position = Vector2(0.0, -h * 0.5)  # bottom edge at origin (feet)
 	add_child(col)
+
+	var rect := ColorRect.new()
+	rect.name = "Visual"
+	rect.size = Vector2(w, h)
+	rect.color = Color(0.35, 0.75, 0.95)
+	rect.position = Vector2(-w * 0.5, -h)  # bottom edge at origin
+	add_child(rect)
 
 
 func _physics_process(delta: float) -> void:

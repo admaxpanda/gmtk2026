@@ -1,10 +1,10 @@
 class_name NegativeSign
 extends Area2D
-## Draggable negative sign that inverts the timer display.
-## When present: timer shows negative values (e.g., -10, -9, -8...)
-## When removed: timer shows positive values (e.g., 10, 9, 8...)
+## Draggable negative sign that flips the timer's counting direction.
+## When present: timer counts UP as a plain number (1 → 2 → ... → 10) — a deception.
+## When removed: timer counts DOWN (10 → 9 → ... → 0) — the true countdown.
 ##
-## Visual: Blue negative sign symbol.
+## Visual: Blue "−" glyph (Label), not a sign actually applied to the number.
 ## Behavior: Draggable, snaps back if dropped outside trash bin.
 
 signal dropped_in_trash
@@ -17,15 +17,17 @@ signal sign_removed  # Emitted when trashed, for timer to revert display
 var _is_dragging: bool = false
 var _drag_offset: Vector2 = Vector2.ZERO
 var _original_position: Vector2 = Vector2.ZERO
-var _visual: Line2D
+var _visual: Label
 var _is_trashed: bool = false
 
 
 func _ready() -> void:
 	input_pickable = true
 	collision_layer = 1 << 3  # draggable layer
-	collision_mask = 0
-	monitoring = false
+	# Monitor the drop-zone layer (4) so get_overlapping_areas() reports the
+	# TrashBin on drop. Without this the sign is never detected and always snaps back.
+	collision_mask = 1 << 4
+	monitoring = true
 	monitorable = true
 
 	_build_visual()
@@ -34,15 +36,19 @@ func _ready() -> void:
 
 
 func _build_visual() -> void:
-	# Draw a horizontal line (minus sign)
-	_visual = Line2D.new()
+	# Render an actual minus-sign glyph so the draggable clearly reads as "−".
+	_visual = Label.new()
 	_visual.name = "Visual"
-	_visual.width = line_width
-	_visual.default_color = sign_color
-	_visual.begin_cap_mode = Line2D.LINE_CAP_ROUND
-	_visual.end_cap_mode = Line2D.LINE_CAP_ROUND
-	_visual.add_point(Vector2(-sign_size.x * 0.5, 0))
-	_visual.add_point(Vector2(sign_size.x * 0.5, 0))
+	_visual.text = "\u2212"  # true minus sign
+	_visual.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_visual.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_visual.add_theme_font_size_override("font_size", 72)
+	_visual.add_theme_color_override("font_color", sign_color)
+	# Controls would otherwise swallow the mouse and break Area2D picking.
+	_visual.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_visual.custom_minimum_size = sign_size
+	_visual.size = sign_size
+	_visual.position = -sign_size * 0.5
 	add_child(_visual)
 
 	# Collision shape
@@ -68,8 +74,8 @@ func _begin_drag(mouse_global: Vector2) -> void:
 	_drag_offset = mouse_global - global_position
 	z_index = 10
 	# Visual feedback
-	_visual.default_color = sign_color.lightened(0.2)
-	_visual.width = line_width * 1.2
+	_visual.add_theme_color_override("font_color", sign_color.lightened(0.2))
+	_visual.scale = Vector2(1.15, 1.15)
 
 
 func _end_drag() -> void:
@@ -77,8 +83,8 @@ func _end_drag() -> void:
 		return
 	_is_dragging = false
 	z_index = 0
-	_visual.default_color = sign_color
-	_visual.width = line_width
+	_visual.add_theme_color_override("font_color", sign_color)
+	_visual.scale = Vector2(1.0, 1.0)
 
 	# Check if dropped in trash bin
 	var dropped_in_trash: bool = false

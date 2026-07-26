@@ -1,22 +1,47 @@
-# Godot 4+ specific ignores
+# ==========================================================================
+# GMTK_COUNTDOWN — .gitignore
+# Godot 4.6 (mono build, GDScript-only project)
+# ==========================================================================
+
+# ---- Godot editor / build cache (fully regenerated locally) -------------
 .godot/
 
-# Imported translations (auto-generated)
+# ---- Godot compiled translation imports (built from .po sources) --------
 *.translation
 
-# Mono / C# (in case of future C# adoption)
+# ---- Mono / C# build artifacts ------------------------------------------
+# Project is GDScript-only, but the bundled editor is the mono build, so keep
+# these standard ignores to avoid accidental crash dumps / build leftovers.
 .mono/
 data_*/
 mono_crash.*.json
 
-# Build / export output
+# ---- Build & export output ----------------------------------------------
 /builds/
 /export/
 
-# Logs
+# ---- Logs & temporary files ---------------------------------------------
 *.log
+.tmp_*/
 
-# OS files
+# ---- Backups (e.g. scenes/levels/levels.json.bak) -----------------------
+*.bak
+
+# ---- Bundled Godot engine distribution (~248 MB binaries, not source) ----
+# Matches Godot_v4.6.3-stable_mono_win64/ and any future version folder.
+Godot_*/
+
+# ---- Local assistant / agent workspaces (machine-specific, regenerated) --
+# .workbuddy/ : WorkBuddy logs + memory
+# .agents/    : agent skill cache (declared in skills-lock.json)
+.workbuddy/
+.agents/
+
+# ---- Editor / IDE settings (personal) ------------------------------------
+.vscode/
+.trae/
+
+# ---- OS cruft ------------------------------------------------------------
 .DS_Store
 Thumbs.db
 desktop.ini
